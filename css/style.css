@@ -1,0 +1,467 @@
+:root {
+    --bg-gradient: radial-gradient(circle at center, #1b263b 0%, #0d1b2a 100%);
+    --grid-bg: rgba(255, 255, 255, 0.05);
+    --grid-line: rgba(255, 255, 255, 0.1);
+
+    --ship-color: #4a6fa5;
+    --ship-border: #89a6c9;
+    --ship-deck: #344e75;
+
+    --hit-color: #e63946;
+    --miss-color: rgba(255, 255, 255, 0.3);
+
+    --accent-color: #00f2ff;
+    --text-color: #e0e1dd;
+
+    --cell-size: 40px;
+    --gap: 3px;
+
+    --glass-panel: rgba(13, 27, 42, 0.85);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 1400px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: var(--glass-border);
+    padding-bottom: 1.5rem;
+    background: linear-gradient(90deg, transparent, rgba(0, 180, 216, 0.05), transparent);
+}
+
+h1 {
+    font-size: 3rem;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+}
+
+h2 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #fff;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.controls-top {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: var(--glass-panel);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: var(--glass-border);
+}
+
+main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 3rem;
+    width: 100%;
+}
+
+/* --- View Switching Logic --- */
+.player-section,
+.computer-section {
+    display: none;
+    /* Hidden by default for logic control */
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.player-section.active,
+.computer-section.active {
+    display: block;
+    opacity: 1;
+    animation: fadeInSection 0.5s ease forwards;
+}
+
+@keyframes fadeInSection {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Grids */
+.grid-container {
+    display: grid;
+    /* 11 columns/rows: 1 for labels, 10 for game cells */
+    grid-template-columns: 30px repeat(10, var(--cell-size));
+    grid-template-rows: 30px repeat(10, var(--cell-size));
+    gap: var(--gap);
+    background-color: transparent;
+    padding: 10px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    /* Updated background grid for 11x11 layout is tricky, disabling lines for labels area */
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    margin: 0 auto;
+}
+
+.label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: var(--accent-color);
+    font-size: 0.9rem;
+    pointer-events: none;
+    /* No clicking labels */
+}
+
+/* Specific background for the game area only? 
+   We can apply it to cells instead or keep it simple.
+   Let's remove the compiled grid background image to avoid misalignment with labels.
+*/
+
+.cell {
+    width: 100%;
+    height: 100%;
+    background-color: var(--grid-bg);
+    cursor: crosshair;
+    position: relative;
+    transition: all 0.2s ease;
+    border-radius: 2px;
+}
+
+/* Hover Effects */
+#player-grid.placement-mode .cell:hover,
+#computer-grid:not(.locked) .cell:hover {
+    background-color: rgba(0, 242, 255, 0.2);
+    box-shadow: 0 0 10px var(--accent-color);
+    z-index: 10;
+}
+
+/* --- Detailed Ship Styling --- */
+.cell.ship {
+    background-color: var(--ship-color);
+    border: 1px solid var(--ship-border);
+    /* Metallic effect */
+    background: linear-gradient(135deg, var(--ship-color) 0%, var(--ship-deck) 50%, var(--ship-color) 100%);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+/* Horizontal Shapes */
+.cell.ship.horizontal.start {
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-right: none;
+    margin-right: -2px;
+    /* Connect visualization */
+    padding-right: 2px;
+}
+
+.cell.ship.horizontal.mid {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    margin-left: -1px;
+    margin-right: -1px;
+    width: calc(100% + 2px);
+}
+
+.cell.ship.horizontal.end {
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-left: none;
+    margin-left: -2px;
+}
+
+/* Vertical Shapes */
+.cell.ship.vertical.start {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom: none;
+    margin-bottom: -2px;
+    padding-bottom: 2px;
+}
+
+.cell.ship.vertical.mid {
+    border-radius: 0;
+    border-top: none;
+    border-bottom: none;
+    margin-top: -1px;
+    margin-bottom: -1px;
+    height: calc(100% + 2px);
+}
+
+.cell.ship.vertical.end {
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-top: none;
+    margin-top: -2px;
+}
+
+/* Sunk Ships */
+/* Sunk Ships */
+/* Sunk Ships Pattern */
+.cell.ship.sunk {
+    background-color: #2b2d42 !important;
+    /* Dark base */
+    border-color: #d90429 !important;
+    opacity: 1;
+    box-shadow: inset 0 0 10px #d90429;
+    /* Diagonal stripe pattern for wreckage look */
+    background-image: repeating-linear-gradient(45deg,
+            #1a1b26,
+            #1a1b26 5px,
+            #2b2d42 5px,
+            #2b2d42 10px);
+    animation: sink 0.8s ease-in-out forwards;
+}
+
+.cell.ship.sunk::before {
+    content: '☠️';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.4rem;
+    z-index: 20;
+    text-shadow: 0 0 5px #000;
+    animation: fadeSkull 1s ease 0.5s forwards;
+    opacity: 0;
+}
+
+@keyframes sink {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+
+    50% {
+        transform: scale(0.9) translateY(2px);
+        filter: brightness(0.7);
+    }
+
+    100% {
+        transform: scale(1);
+        filter: brightness(0.6) grayscale(0.8);
+    }
+}
+
+@keyframes fadeSkull {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Hits and Misses */
+.cell.hit::after {
+    content: '';
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    top: 15%;
+    left: 15%;
+    background: radial-gradient(circle, #ff5400 20%, transparent 70%);
+    border-radius: 50%;
+    box-shadow: 0 0 15px #ff5400;
+    animation: blast 0.4s ease-out forwards;
+}
+
+.cell.miss::after {
+    content: '';
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    top: 35%;
+    left: 35%;
+    background-color: var(--miss-color);
+    border-radius: 50%;
+    animation: splash 0.4s ease-out;
+}
+
+.message-log {
+    background: var(--glass-panel);
+    padding: 1.5rem;
+    border-radius: 10px;
+    width: 300px;
+    margin-bottom: 2rem;
+    text-align: center;
+    border: var(--glass-border);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.controls-panel button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 0.8rem;
+    background: rgba(0, 180, 216, 0.1);
+    border: 1px solid var(--accent-color);
+    color: #fff;
+    font-family: inherit;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 4px;
+}
+
+.controls-panel button:hover:not(:disabled) {
+    background: var(--accent-color);
+    color: #000;
+    box-shadow: 0 0 15px var(--accent-color);
+}
+
+.controls-panel button:disabled {
+    border-color: #555;
+    color: #555;
+    cursor: not-allowed;
+}
+
+/* Animations */
+@keyframes blast {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+}
+
+@keyframes splash {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.4);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+}
+
+@media (max-width: 900px) {
+    .app-container {
+        padding: 5px;
+    }
+
+    main {
+        gap: 1.5rem;
+    }
+
+    .grid-container {
+        --cell-size: 28px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(13, 27, 42, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--glass-panel);
+    padding: 3rem;
+    border-radius: 16px;
+    border: 1px solid var(--accent-color);
+    text-align: center;
+    box-shadow: 0 0 50px rgba(0, 242, 255, 0.2);
+    max-width: 500px;
+    width: 90%;
+    animation: slideUp 0.4s ease-out;
+}
+
+.modal-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.modal-content p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #b8c0c2;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
