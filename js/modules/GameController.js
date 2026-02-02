@@ -55,8 +55,9 @@ class GameController {
             }
         });
 
-        this.dom.restartBtn.addEventListener('click', () => this.restart());
+        this.dom.restartBtn.addEventListener('click', () => this.dom.restartGame());
         this.dom.modalRestartBtn.addEventListener('click', () => this.restart());
+        this.dom.modelRestartBtnCancel.addEventListener('click', () => this.dom.stopRestart());
 
         this.dom.soundToggle.addEventListener('click', () => {
             const isOn = this.audio.toggle();
