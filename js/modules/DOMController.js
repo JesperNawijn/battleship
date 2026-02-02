@@ -16,6 +16,7 @@ class DOMController {
         this.randomBtn = document.getElementById('random-btn');
         this.restartBtn = document.getElementById('restart-btn');
         this.modalRestartBtn = document.getElementById('modal-restart-btn');
+        this.modelRestartBtnCancel = document.getElementById('model-restart-btn-cancel');
         this.soundToggle = document.getElementById('sound-toggle');
 
         // Panels
@@ -202,6 +203,22 @@ class DOMController {
 
     updateTurn(count) {
         this.turnCount.textContent = count;
+    }
+
+    restartGame(){
+        this.modal.classList.remove('hidden');
+        this.modelRestartBtnCancel.classList.remove('hidden');
+        this.modal.style.opacity = '1';
+        const title = document.getElementById('modal-title');
+        const msg = document.getElementById('modal-message');
+
+        title.textContent = 'Herstarten';
+        title.style.color = '#00b4d8';
+        msg.textContent = 'Kapitein, wilt u uw vloot terug trekken?';
+    }
+
+    stopRestart(){
+        this.modal.classList.add('hidden');
     }
 
     setGameOver(winner) {

@@ -35,7 +35,6 @@ class Player {
 
         let x, y;
         let result = 'already-shot';
-
         // Hunting Mode: If we have potential targets from previous hits
         while (this.potentialTargets.length > 0) {
             const output = this.potentialTargets.pop();
