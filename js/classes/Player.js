@@ -3,6 +3,7 @@ class Player {
         this.type = type;
         this.gameboard = new Gameboard();
         this.potentialTargets = []; // Stack for AI hunting mode
+        this.currentHits = [];
     }
 
     // Random placement for AI (and potentially auto-place for human)
@@ -61,12 +62,15 @@ class Player {
 
         // If Hit, add adjacent cells to potentialTargets
         if (result === 'hit') {
-            this.addPotentialTargets(x, y);
+            this.currentHits.push({ x, y });
+            
+            this.addPotentialTarget(x, y);
         } else if (result === 'sunk') {
             // Ship sunk! Stop hunting around it.
             // We clear the stack to avoid shooting at neighbors of the sunk ship.
             // Limitation: If touching another ship, we might lose track, but this feels smarter to the user.
             this.potentialTargets = [];
+            this.currentHits = [];
         }
 
         return { x, y, result };
@@ -81,29 +85,50 @@ class Player {
         return x >= 0 && x < 10 && y >= 0 && y < 10;
     }
 
-    addPotentialTargets(x, y) {
-        // Push adjacent cells: Up, Down, Left, Right
-        // We push them to stack. Randomize order for less predictable AI? 
-        // Or specific pattern. Let's just push.
-        const adj = [
-            { x: x, y: y - 1 },
-            { x: x, y: y + 1 },
-            { x: x - 1, y: y },
-            { x: x + 1, y: y }
-        ];
+    addPotentialTarget(x,y){
 
-        // Shuffle to make it less robot-scanning looking
+        const type = this.getHitDirection();
+        let adj = [];
+
+        if(!type){
+            adj = [
+                { x: x, y: y - 1 },
+                { x: x, y: y + 1 },
+                { x: x - 1, y: y },
+                { x: x + 1, y: y }
+            ];
+        }else if(type === "horizontal"){
+            adj = [
+                {x: x - 1, y: y},
+                {x: x + 1, y: y}
+            ];
+        }else if(type === "vertical"){
+            adj = [
+                {x: x - 1, y: y},
+                {x: x + 1, y: y}
+            ]
+        }
+
         for (let i = adj.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [adj[i], adj[j]] = [adj[j], adj[i]];
         }
 
         adj.forEach(coord => {
-            // We don't check board state here, just bounds, to keep logic simple.
-            // The loop in computerAttack checks board state before firing.
             if (this.isValidCoord(coord.x, coord.y)) {
                 this.potentialTargets.push(coord);
             }
         });
+    }
+    getHitDirection(){
+        if (this.type !== 'computer') return null;
+        if(this.currentHits.length < 2) return null;
+        
+        const [a,b] = this.currentHits;
+
+        if(a.x == b.x) return "vertical";
+        if(a.y == b.y) return "horizontal";
+
+        return null;
     }
 }
