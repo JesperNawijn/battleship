@@ -104,8 +104,8 @@ class Player {
             ];
         }else if(type === "vertical"){
             adj = [
-                {x: x - 1, y: y},
-                {x: x + 1, y: y}
+                {x: x, y: y - 1},
+                {x: x, y: y + 1}
             ]
         }
 
