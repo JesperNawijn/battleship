@@ -249,7 +249,12 @@ class GameController {
         } else if (result === 'sunk') {
             this.audio.playSunk();
             this.updateMessage("Computer heeft een schip laten zinken!");
-            setTimeout(() => this.computerTurn(), 1500);
+            setTimeout(() => {
+                this.checkGameOver()
+                if(this.gameState === 'playing'){
+                    this.computerTurn();
+                }   
+            }, 1500);
         } else {
             this.audio.playMiss();
             this.updateMessage(`Computer mist op ${this.coordToText(attackData.x, attackData.y)}.`);
