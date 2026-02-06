@@ -88,8 +88,15 @@ class GameController {
     handlePlacementHover(e) {
         if (this.gameState !== 'setup' || this.currentShipIndex >= this.shipsToPlace.length) return;
 
+        const cells = document.querySelectorAll('#player-grid .cell');
+        cells.forEach(c => {
+            c.classList.remove("horizontal", "vertical");
+            c.classList.remove('start', 'mid', 'end');
+        });
+
         const x = parseInt(e.target.dataset.x);
         const y = parseInt(e.target.dataset.y);
+
         const length = this.shipsToPlace[this.currentShipIndex].length;
 
         // Preview logic
@@ -97,19 +104,35 @@ class GameController {
         const coords = [];
         const isValid = this.human.gameboard.isValidPlacement(length, x, y, this.placementDirection);
 
+        console.log(isValid);
         for (let i = 0; i < length; i++) {
             let cx = this.placementDirection === 'horizontal' ? x + i : x;
             let cy = this.placementDirection === 'horizontal' ? y : y + i;
+            console.log(cx, cy)
             if (cx < 10 && cy < 10) {
                 coords.push({ x: cx, y: cy });
+                console.log(coords)
             }
         }
-
         // Add preview classes manually for speed (bypassing full render)
-        coords.forEach(c => {
+
+        coords.forEach((c,i) => {
             const cell = document.querySelector(`#player-grid .cell[data-x="${c.x}"][data-y="${c.y}"]`);
             if (cell) {
-                cell.classList.add(isValid ? 'preview' : 'preview-invalid');
+                
+                cell.classList.add('preview');
+                if(!isValid) cell.classList.add('preview-invalid');
+                // cell.classList.add(isValid ? 'preview' : 'preview-invalid');
+
+                let shipPartClass =
+                    i === 0 ? 'start' :
+                    i === length - 1 ? 'end' : 'mid';
+
+                console.log(shipPartClass)
+                cell.classList.add(shipPartClass);
+                cell.classList.add(this.placementDirection);
+                console.log(this.placementDirection);
+                console.log(shipPartClass);
             }
         });
     }
