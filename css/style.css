@@ -238,27 +238,6 @@ main {
     margin-top: -2px;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* --- Detailed Ship Styling --- */
 .cell.ship {
     background-color: var(--ship-color);
