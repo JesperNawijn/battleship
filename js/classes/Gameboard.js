@@ -43,29 +43,8 @@ class Gameboard {
         return true;
     }
 
-    // isValidPlacement(length, x, y, direction) {
-    //     // Boundary checks
-    //     if (direction === 'horizontal') {
-    //         if (x + length > this.size) return false;
-    //     } else {
-    //         if (y + length > this.size) return false;
-    //     }
-
-    //     // Collision checks
-    //     for (let i = 0; i < length; i++) {
-    //         let currentX = direction === 'horizontal' ? x + i : x;
-    //         let currentY = direction === 'horizontal' ? y : y + i;
-
-    //         if (this.board[currentY][currentX] !== null) {
-    //             return false;
-    //         }
-    //     }
-
-    //     return true;
-    // }
-
     isValidPlacement(length, x, y, direction) {
-        // 1. Boundary checks (Blijft hetzelfde)
+        // 1. Boundary checks
         if (direction === 'horizontal') {
             if (x + length > this.size) return false;
         } else {
