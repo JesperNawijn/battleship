@@ -44,26 +44,37 @@ class Gameboard {
     }
 
     isValidPlacement(length, x, y, direction) {
-        // Boundary checks
+        // 1. Boundary checks
         if (direction === 'horizontal') {
             if (x + length > this.size) return false;
         } else {
             if (y + length > this.size) return false;
         }
 
-        // Collision checks
+        // 2. Uitgebreide Collision & Neighbor checks
         for (let i = 0; i < length; i++) {
             let currentX = direction === 'horizontal' ? x + i : x;
             let currentY = direction === 'horizontal' ? y : y + i;
 
-            if (this.board[currentY][currentX] !== null) {
-                return false;
+            // Controleer een 3x3 gebied rondom het huidige vakje (currentX, currentY)
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    let neighborX = currentX + dx;
+                    let neighborY = currentY + dy;
+
+                    // Controleer of de buurman binnen de grenzen van het bord ligt
+                    if (neighborX >= 0 && neighborX < this.size && neighborY >= 0 && neighborY < this.size) {
+                        // Als een omliggend vakje niet leeg is, mag het schip hier niet staan
+                        if (this.board[neighborY][neighborX] !== null) {
+                            return false;
+                        }
+                    }
+                }
             }
         }
 
         return true;
     }
-
     receiveAttack(x, y) {
         const target = this.board[y][x];
 
@@ -120,7 +131,7 @@ class Gameboard {
             // But we can't lose the ship reference if we want to check isSunk later easily by iterating board?
             // Actually ships are stored in this.ships array. So we can overwrite board cell.
             this.board[y][x] = 'hit';
-
+            
             return ship.isSunk() ? 'sunk' : 'hit';
         }
     }
