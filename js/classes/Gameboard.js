@@ -56,7 +56,7 @@ class Gameboard {
             let currentX = direction === 'horizontal' ? x + i : x;
             let currentY = direction === 'horizontal' ? y : y + i;
 
-            // Controleer een 3x3 gebied rondom het huidige vakje (currentX, currentY)
+            // Controleer een 3x3 gebied rondom het huidige vakje (currentX, currentY) || SAMEN GEMAAKT MET GEMINI (ZIE VERSLAG)
             for (let dy = -1; dy <= 1; dy++) {
                 for (let dx = -1; dx <= 1; dx++) {
                     let neighborX = currentX + dx;
@@ -140,3 +140,4 @@ class Gameboard {
         return this.ships.every(ship => ship.isSunk());
     }
 }
+
