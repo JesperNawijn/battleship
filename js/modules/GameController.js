@@ -19,6 +19,7 @@ class GameController {
             { name: 'Torpedoboot', length: 2 }
         ];
         this.currentShipIndex = 0;
+        this.currentHoverEvent = null;
         this.placementDirection = 'horizontal';
     }
 
@@ -74,6 +75,11 @@ class GameController {
         document.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'r' && this.gameState === 'setup') {
                 this.dom.rotateBtn.click();
+                setTimeout(() => {
+                    if (this.currentHoverEvent) {
+                        this.handlePlacementHover(this.currentHoverEvent);
+                    }
+                }, 100);
             }
         });
     }
@@ -88,6 +94,7 @@ class GameController {
     handlePlacementHover(e) {
         if (this.gameState !== 'setup' || this.currentShipIndex >= this.shipsToPlace.length) return;
 
+        this.currentHoverEvent = e;
         const cellsReset = document.querySelectorAll('#player-grid .cell:not(.ship)');
         cellsReset.forEach(c => {
             c.classList.remove('preview', 'preview-invalid', 'start', 'mid', 'end', 'horizontal', 'vertical');
