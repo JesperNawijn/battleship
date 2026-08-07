@@ -93,8 +93,6 @@ class GameController {
 
     handlePlacementHover(e) {
         if (this.gameState !== 'setup' || this.currentShipIndex >= this.shipsToPlace.length) return;
-
-        this.currentHoverEvent = e;
         
         const cells = document.querySelectorAll('#player-grid .cell');
         cells.forEach(c => {
@@ -102,6 +100,8 @@ class GameController {
             c.classList.remove('start', 'mid', 'end');
         });
 
+        this.currentHoverEvent = e;
+        
         const x = parseInt(e.target.dataset.x);
         const y = parseInt(e.target.dataset.y);
 
